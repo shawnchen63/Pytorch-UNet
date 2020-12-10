@@ -144,11 +144,11 @@ def get_args():
                         help='Downscaling factor of the images')
     parser.add_argument('-v', '--validation', dest='val', type=float, default=10.0,
                         help='Percent of the data that is used as validation (0-100)')
-    parser.add_argument('-f', '--dir_img', dest='dir_img', type=str, default='data/imgs/',
+    parser.add_argument('-i', '--dir_img', dest='dir_img', type=str, default='data/imgs/',
                         help='Load model from a .pth file')
-    parser.add_argument('-f', '--dir_target', dest='dir_target', type=str, default='data/targets/',
+    parser.add_argument('-t', '--dir_target', dest='dir_target', type=str, default='data/targets/',
                         help='Load model from a .pth file')
-    parser.add_argument('-f', '--dir_checkpoint', dest='dir_checkpoint', type=str, default='checkpoints/',
+    parser.add_argument('-c', '--dir_checkpoint', dest='dir_checkpoint', type=str, default='checkpoints/',
                         help='Load model from a .pth file')
     return parser.parse_args()
 
