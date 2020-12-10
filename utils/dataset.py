@@ -50,7 +50,7 @@ class BasicDataset(Dataset):
 
     def __getitem__(self, i):
         img_file = self.imgs_paths[i]
-        idx = img_file.split("_")[-2] + "_"
+        idx = img_file.split('/')[-1].split('_')[0] + "_"
         target_file = glob(self.targets_dir + idx + self.target_suffix + '.*')
 
         assert len(target_file) == 1, \
