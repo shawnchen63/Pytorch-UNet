@@ -21,13 +21,11 @@ from torch.utils.tensorboard import SummaryWriter
 from utils.dataset import BasicDataset
 from torch.utils.data import DataLoader, random_split
 
-dir_img = 'data/imgs/'
-dir_target = 'data/targets/'
-dir_checkpoint = 'checkpoints/'
-
-
 def train_net(net,
               device,
+              dir_img,
+              dir_target,
+              dir_checkpoint,
               epochs=5,
               batch_size=1,
               lr=0.001,
@@ -146,13 +144,19 @@ def get_args():
                         help='Downscaling factor of the images')
     parser.add_argument('-v', '--validation', dest='val', type=float, default=10.0,
                         help='Percent of the data that is used as validation (0-100)')
-
+    parser.add_argument('-f', '--dir_img', dest='dir_img', type=str, default='data/imgs/',
+                        help='Load model from a .pth file')
+    parser.add_argument('-f', '--dir_target', dest='dir_target', type=str, default='data/targets/',
+                        help='Load model from a .pth file')
+    parser.add_argument('-f', '--dir_checkpoint', dest='dir_checkpoint', type=str, default='checkpoints/',
+                        help='Load model from a .pth file')
     return parser.parse_args()
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
     args = get_args()
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     logging.info(f'Using device {device}')
 
@@ -180,6 +184,9 @@ if __name__ == '__main__':
 
     try:
         train_net(net=net,
+                  dir_img = args.dir_img,
+                  dir_target = args.dir_target,
+                  dir_checkpoint = args.dir_checkpoint,
                   epochs=args.epochs,
                   batch_size=args.batchsize,
                   lr=args.lr,
