@@ -10,11 +10,11 @@ from predict import predict_img
 from unet import UNet
 
 # credits to https://stackoverflow.com/users/6076729/manuel-lagunas
-def rle_encode(mask_image):
-    pixels = mask_image.flatten()
+def rle_encode(target_image):
+    pixels = target_image.flatten()
     # We avoid issues with '1' at the start or end (at the corners of
     # the original image) by setting those pixels to '0' explicitly.
-    # We do not expect these to be non-zero for an accurate mask,
+    # We do not expect these to be non-zero for an accurate target,
     # so this should not harm the score.
     pixels[0] = 0
     pixels[-1] = 0
@@ -29,14 +29,14 @@ def submit(net):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     N = len(list(os.listdir(dir)))
     with open('SUBMISSION.csv', 'a') as f:
-        f.write('img,rle_mask\n')
+        f.write('img,rle_target\n')
         for index, i in enumerate(os.listdir(dir)):
             print('{}/{}'.format(index, N))
 
             img = Image.open(dir + i)
 
-            mask = predict_img(net, img, device)
-            enc = rle_encode(mask)
+            target = predict_img(net, img, device)
+            enc = rle_encode(target)
             f.write('{},{}\n'.format(i, ' '.join(map(str, enc))))
 
 

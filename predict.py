@@ -9,7 +9,7 @@ from PIL import Image
 from torchvision import transforms
 
 from unet import UNet
-from utils.data_vis import plot_img_and_mask
+from utils.data_vis import plot_img_and_target
 from utils.dataset import BasicDataset
 
 
@@ -44,13 +44,13 @@ def predict_img(net,
         )
 
         probs = tf(probs.cpu())
-        full_mask = probs.squeeze().cpu().numpy()
+        full_target = probs.squeeze().cpu().numpy()
 
-    return full_mask > out_threshold
+    return full_target > out_threshold
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description='Predict masks from input images',
+    parser = argparse.ArgumentParser(description='Predict targets from input images',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--model', '-m', default='MODEL.pth',
                         metavar='FILE',
@@ -64,10 +64,10 @@ def get_args():
                         help="Visualize the images as they are processed",
                         default=False)
     parser.add_argument('--no-save', '-n', action='store_true',
-                        help="Do not save the output masks",
+                        help="Do not save the output targets",
                         default=False)
-    parser.add_argument('--mask-threshold', '-t', type=float,
-                        help="Minimum probability value to consider a mask pixel white",
+    parser.add_argument('--target-threshold', '-t', type=float,
+                        help="Minimum probability value to consider a target pixel white",
                         default=0.5)
     parser.add_argument('--scale', '-s', type=float,
                         help="Scale factor for the input images",
@@ -93,8 +93,8 @@ def get_output_filenames(args):
     return out_files
 
 
-def mask_to_image(mask):
-    return Image.fromarray((mask * 255).astype(np.uint8))
+def target_to_image(target):
+    return Image.fromarray((target * 255).astype(np.uint8))
 
 
 if __name__ == "__main__":
@@ -118,19 +118,19 @@ if __name__ == "__main__":
 
         img = Image.open(fn)
 
-        mask = predict_img(net=net,
+        target = predict_img(net=net,
                            full_img=img,
                            scale_factor=args.scale,
-                           out_threshold=args.mask_threshold,
+                           out_threshold=args.target_threshold,
                            device=device)
 
         if not args.no_save:
             out_fn = out_files[i]
-            result = mask_to_image(mask)
+            result = target_to_image(target)
             result.save(out_files[i])
 
-            logging.info("Mask saved to {}".format(out_files[i]))
+            logging.info("target saved to {}".format(out_files[i]))
 
         if args.viz:
             logging.info("Visualizing results for image {}, close to continue ...".format(fn))
-            plot_img_and_mask(img, mask)
+            plot_img_and_target(img, target)

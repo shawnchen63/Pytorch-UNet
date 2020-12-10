@@ -7,21 +7,27 @@ from torch.utils.data import Dataset
 import logging
 from PIL import Image
 
+from utils.image_folder import make_dataset
+
 
 class BasicDataset(Dataset):
-    def __init__(self, imgs_dir, masks_dir, scale=1, mask_suffix=''):
+    def __init__(self, imgs_dir, targets_dir, scale=1, target_suffix='ExpertC'):
         self.imgs_dir = imgs_dir
-        self.masks_dir = masks_dir
+        self.targets_dir = targets_dir
         self.scale = scale
-        self.mask_suffix = mask_suffix
+        self.target_suffix = target_suffix
         assert 0 < scale <= 1, 'Scale must be between 0 and 1'
 
-        self.ids = [splitext(file)[0] for file in listdir(imgs_dir)
-                    if not file.startswith('.')]
-        logging.info(f'Creating dataset with {len(self.ids)} examples')
+        #self.ids = [splitext(file)[0] for file in listdir(imgs_dir)
+        #            if not file.startswith('.')]
+
+        self.imgs_paths = sorted(make_dataset(self.imgs_dir))
+        #self.target_paths = sorted(make_dataset(self.targets_dir))
+
+        logging.info(f'Creating dataset with {len(self.input_paths)} input images')
 
     def __len__(self):
-        return len(self.ids)
+        return len(self.imgs_paths)
 
     @classmethod
     def preprocess(cls, pil_img, scale):
@@ -43,29 +49,27 @@ class BasicDataset(Dataset):
         return img_trans
 
     def __getitem__(self, i):
-        idx = self.ids[i]
-        mask_file = glob(self.masks_dir + idx + self.mask_suffix + '.*')
-        img_file = glob(self.imgs_dir + idx + '.*')
+        img_file = self.imgs_paths[i]
+        idx = img_file.split("_")[-2] + "_"
+        target_file = glob(self.targets_dir + idx + self.target_suffix + '.*')
 
-        assert len(mask_file) == 1, \
-            f'Either no mask or multiple masks found for the ID {idx}: {mask_file}'
-        assert len(img_file) == 1, \
-            f'Either no image or multiple images found for the ID {idx}: {img_file}'
-        mask = Image.open(mask_file[0])
-        img = Image.open(img_file[0])
+        assert len(target_file) == 1, \
+            f'Either no target or multiple targets found for the ID {idx}: {target_file}'
+        target = Image.open(target_file[0])
+        img = Image.open(img_file)
 
-        assert img.size == mask.size, \
-            f'Image and mask {idx} should be the same size, but are {img.size} and {mask.size}'
+        assert img.size == target.size, \
+            f'Image and target {idx} should be the same size, but are {img.size} and {target.size}'
 
         img = self.preprocess(img, self.scale)
-        mask = self.preprocess(mask, self.scale)
+        target = self.preprocess(target, self.scale)
 
         return {
             'image': torch.from_numpy(img).type(torch.FloatTensor),
-            'mask': torch.from_numpy(mask).type(torch.FloatTensor)
+            'target': torch.from_numpy(target).type(torch.FloatTensor)
         }
 
 
 class CarvanaDataset(BasicDataset):
-    def __init__(self, imgs_dir, masks_dir, scale=1):
-        super().__init__(imgs_dir, masks_dir, scale, mask_suffix='_mask')
+    def __init__(self, imgs_dir, targets_dir, scale=1):
+        super().__init__(imgs_dir, targets_dir, scale, target_suffix='_target')
