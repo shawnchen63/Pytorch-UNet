@@ -22,7 +22,7 @@ def eval_net(net, loader, device):
             with torch.no_grad():
                 target_pred = net(imgs)
 
-            loss = nn.L1Loss()
+            loss = nn.MSELoss()
             tot += loss(target_pred, true_targets).item()
             """
             if net.n_classes > 1:
