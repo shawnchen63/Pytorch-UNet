@@ -192,6 +192,7 @@ if __name__ == '__main__':
                   dir_img = args.dir_img,
                   dir_target = args.dir_target,
                   dir_checkpoint = args.dir_checkpoint,
+                  dir_log = args.dir_log,
                   epochs=args.epochs,
                   batch_size=args.batchsize,
                   lr=args.lr,
