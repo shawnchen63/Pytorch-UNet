@@ -24,7 +24,7 @@ class BasicDataset(Dataset):
         self.imgs_paths = sorted(make_dataset(self.imgs_dir))
         #self.target_paths = sorted(make_dataset(self.targets_dir))
 
-        logging.info(f'Creating dataset with {len(self.imgs_dir)} input images')
+        logging.info(f'Creating dataset with {len(self.imgs_paths)} input images')
 
     def __len__(self):
         return len(self.imgs_paths)

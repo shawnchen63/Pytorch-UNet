@@ -79,7 +79,7 @@ def train_net(net,
                     'the images are loaded correctly.'
 
                 imgs = imgs.to(device=device, dtype=torch.float32)
-                target_type = torch.float32 if net.n_classes == 1 else torch.long
+                target_type = torch.float32
                 true_targets = true_targets.to(device=device, dtype=target_type)
 
                 targets_pred = net(imgs)
@@ -153,7 +153,7 @@ def get_args():
                         help='Load model from a .pth file')
     parser.add_argument('-c', '--dir_checkpoint', dest='dir_checkpoint', type=str, default='checkpoints/',
                         help='Load model from a .pth file')
-    parser.add_argument('-l', '--dir_log', dest='dir_log', type=str, default='runs/',
+    parser.add_argument('-g', '--dir_log', dest='dir_log', type=str, default='runs/',
                         help='Log directory for tensorboard')
     return parser.parse_args()
 
