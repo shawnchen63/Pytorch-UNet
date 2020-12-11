@@ -26,6 +26,7 @@ def train_net(net,
               dir_img,
               dir_target,
               dir_checkpoint,
+              dir_log,
               epochs=5,
               batch_size=1,
               lr=0.001,
@@ -40,7 +41,7 @@ def train_net(net,
     train_loader = DataLoader(train, batch_size=batch_size, shuffle=True, num_workers=8, pin_memory=True)
     val_loader = DataLoader(val, batch_size=batch_size, shuffle=False, num_workers=8, pin_memory=True, drop_last=True)
 
-    writer = SummaryWriter(comment=f'LR_{lr}_BS_{batch_size}_SCALE_{img_scale}')
+    writer = SummaryWriter(dir_log, comment=f'LR_{lr}_BS_{batch_size}_SCALE_{img_scale}')
     global_step = 0
 
     logging.info(f'''Starting training:
@@ -95,7 +96,7 @@ def train_net(net,
 
                 pbar.update(imgs.shape[0])
                 global_step += 1
-                if global_step % (n_train // (10 * batch_size)) == 0:
+                if global_step % (n_train // (2 * batch_size)) == 0:
                     for tag, value in net.named_parameters():
                         tag = tag.replace('.', '/')
                         writer.add_histogram('weights/' + tag, value.data.cpu().numpy(), global_step)
@@ -115,6 +116,8 @@ def train_net(net,
                     """
                     writer.add_images('images', imgs, global_step)
                     writer.add_images('pred', targets_pred, global_step)
+                    writer.add_images('ground_truths', true_targets, global_step)
+
 
         if save_cp:
             try:
@@ -140,7 +143,7 @@ def get_args():
                         help='Learning rate', dest='lr')
     parser.add_argument('-f', '--load', dest='load', type=str, default=False,
                         help='Load model from a .pth file')
-    parser.add_argument('-s', '--scale', dest='scale', type=float, default=0.5,
+    parser.add_argument('-s', '--scale', dest='scale', type=float, default=1.0,
                         help='Downscaling factor of the images')
     parser.add_argument('-v', '--validation', dest='val', type=float, default=10.0,
                         help='Percent of the data that is used as validation (0-100)')
@@ -150,6 +153,8 @@ def get_args():
                         help='Load model from a .pth file')
     parser.add_argument('-c', '--dir_checkpoint', dest='dir_checkpoint', type=str, default='checkpoints/',
                         help='Load model from a .pth file')
+    parser.add_argument('-l', '--dir_log', dest='dir_log', type=str, default='runs/',
+                        help='Log directory for tensorboard')
     return parser.parse_args()
 
 
