@@ -63,7 +63,7 @@ def train_net(net,
     else:
         criterion = nn.BCEWithLogitsLoss()
     """
-    criterion = torch.nn.L1Loss()
+    criterion = torch.nn.MSELoss()
 
     for epoch in range(epochs):
         net.train()
