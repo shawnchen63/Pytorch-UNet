@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from PIL import Image
+from numpy import moveaxis
 from torchvision import transforms
 
 from unet import UNet
@@ -24,13 +25,10 @@ def predict_img(net,
 
     img = img.unsqueeze(0)
     img = img.to(device=device, dtype=torch.float32)
-
     with torch.no_grad():
         output = net(img)
+        output = output.squeeze()
         """
-
-        probs = probs.squeeze(0)
-
         tf = transforms.Compose(
             [
                 transforms.ToPILImage(),
@@ -43,7 +41,7 @@ def predict_img(net,
         full_target = probs.squeeze().cpu().numpy()
         """
 
-    return output
+    return output.cpu().numpy()
 
 
 def get_args():
@@ -58,13 +56,13 @@ def get_args():
                         help='Filenames of ouput images')
     parser.add_argument('--viz', '-v', action='store_true',
                         help="Visualize the images as they are processed",
-                        default=True)
+                        default=False)
     parser.add_argument('--no-save', '-n', action='store_true',
                         help="Do not save the output targets",
                         default=False)
     parser.add_argument('--scale', '-s', type=float,
                         help="Scale factor for the input images",
-                        default=0.5)
+                        default=1.0)
 
     return parser.parse_args()
 
@@ -87,6 +85,7 @@ def get_output_filenames(args):
 
 
 def target_to_image(target):
+    target = moveaxis(target, 0, 2)
     return Image.fromarray((target * 255).astype(np.uint8))
 
 
@@ -96,7 +95,7 @@ if __name__ == "__main__":
     out_files = get_output_filenames(args)
 
     net = UNet(n_channels=3, n_classes=3)
-
+    logging.basicConfig(level = logging.INFO)
     logging.info("Loading model {}".format(args.model))
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
