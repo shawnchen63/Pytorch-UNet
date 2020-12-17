@@ -21,9 +21,8 @@ class BasicDataset(Dataset):
         #self.ids = [splitext(file)[0] for file in listdir(imgs_dir)
         #            if not file.startswith('.')]
 
-        self.imgs_paths = sorted(make_dataset(self.imgs_dir))
+        self.imgs_paths = make_dataset(self.imgs_dir)
         #self.target_paths = sorted(make_dataset(self.targets_dir))
-
         logging.info(f'Creating dataset with {len(self.imgs_paths)} input images')
 
     def __len__(self):
@@ -66,7 +65,8 @@ class BasicDataset(Dataset):
 
         return {
             'image': torch.from_numpy(img).type(torch.FloatTensor),
-            'target': torch.from_numpy(target).type(torch.FloatTensor)
+            'target': torch.from_numpy(target).type(torch.FloatTensor),
+            'idx': idx.split("_")[0]
         }
 
 

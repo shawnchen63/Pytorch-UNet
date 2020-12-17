@@ -19,7 +19,7 @@ from unet import UNet
 
 from torch.utils.tensorboard import SummaryWriter
 from utils.dataset import BasicDataset
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, random_split, SubsetRandomSampler
 
 def train_net(net,
               device,
@@ -37,9 +37,15 @@ def train_net(net,
     dataset = BasicDataset(dir_img, dir_target, img_scale)
     n_val = int(len(dataset) * val_percent)
     n_train = len(dataset) - n_val
-    train, val = random_split(dataset, [n_train, n_val])
-    train_loader = DataLoader(train, batch_size=batch_size, shuffle=True, num_workers=8, pin_memory=True)
-    val_loader = DataLoader(val, batch_size=batch_size, shuffle=False, num_workers=8, pin_memory=True, drop_last=True)
+
+    indices = list(range(len(dataset)))
+
+    train_idx, valid_idx = indices[:n_train], indices[n_train:]
+    train_sampler = SubsetRandomSampler(train_idx)
+    valid_sampler = SubsetRandomSampler(valid_idx)
+
+    train_loader = DataLoader(dataset, batch_size=batch_size, sampler=train_sampler, num_workers=8, pin_memory=True)
+    val_loader = DataLoader(dataset, batch_size=batch_size, sampler=valid_sampler, num_workers=8, pin_memory=True, drop_last=True)
 
     writer = SummaryWriter(dir_log, comment=f'LR_{lr}_BS_{batch_size}_SCALE_{img_scale}')
     global_step = 0
