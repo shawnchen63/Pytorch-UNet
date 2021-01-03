@@ -24,7 +24,7 @@ def is_image_file(filename):
 def make_dataset(dir):
     images = []
     assert os.path.isdir(dir), '%s is not a valid directory' % dir
-    accepted = ["Input", "00", "01", "1"]
+    accepted = ["Input", "02", "04", "06", "08", "10"]
     for root, _, fnames in os.walk(dir):
         for fname in fnames:
             if is_image_file(fname) and fname.split(".")[0].split("_")[-1] in accepted:
