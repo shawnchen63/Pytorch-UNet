@@ -11,7 +11,7 @@ from utils.image_folder import make_dataset
 
 
 class BasicDataset(Dataset):
-    def __init__(self, imgs_dir, targets_dir, scale=1, target_suffix='ExpertC'):
+    def __init__(self, imgs_dir, targets_dir, scale=1, target_suffix='Target'):
         self.imgs_dir = imgs_dir
         self.targets_dir = targets_dir
         self.scale = scale
