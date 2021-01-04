@@ -43,7 +43,7 @@ def get_args():
 
     parser.add_argument('-b', '--batch-size', metavar='B', type=int, nargs='?', default=16,
                         help='Batch size', dest='batchsize')
-    parser.add_argument('-f', '--load', dest='load', type=str, default=False, metavar='FILE',
+    parser.add_argument('-f', '--load', dest='load', type=str, default='checkpoints/CP_epoch20.pth', metavar='FILE',
                         help='Load model from a .pth file')
     parser.add_argument('-s', '--scale', dest='scale', type=float, default=1.0,
                         help='Downscaling factor of the images')
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     logging.info(f'Using device {device}')
     net.to(device=device)
-    net.load_state_dict(torch.load(args.model, map_location=device))
+    net.load_state_dict(torch.load(args.load, map_location=device))
 
     logging.info("Model loaded !")
     
