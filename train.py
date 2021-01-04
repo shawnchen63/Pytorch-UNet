@@ -147,7 +147,7 @@ def get_args():
                         help='Batch size', dest='batchsize')
     parser.add_argument('-l', '--learning-rate', metavar='LR', type=float, nargs='?', default=0.0001,
                         help='Learning rate', dest='lr')
-    parser.add_argument('-f', '--load', dest='load', type=str, default=False,
+    parser.add_argument('-f', '--load', dest='load', type=str, default='checkpoints/CP_epoch20.pth',
                         help='Load model from a .pth file')
     parser.add_argument('-s', '--scale', dest='scale', type=float, default=1.0,
                         help='Downscaling factor of the images')
@@ -161,6 +161,8 @@ def get_args():
                         help='Checkpoints directory')
     parser.add_argument('-g', '--dir_log', dest='dir_log', type=str, default='runs/',
                         help='Log directory for tensorboard')
+    parser.add_argument('-a'. '--use_augment', action='store_true', help='use augmented data')
+
     return parser.parse_args()
 
 
