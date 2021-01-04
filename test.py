@@ -31,7 +31,7 @@ def test_net(net,
     test_idx = indices[:n_val]
     test_sampler = SubsetRandomSampler(test_idx)
 
-    test_loader = DataLoader(dataset, batch_size=batch_size, sampler=valid_sampler, num_workers=8, pin_memory=True, drop_last=True)
+    test_loader = DataLoader(dataset, batch_size=batch_size, sampler=test_sampler, num_workers=8, pin_memory=True, drop_last=True)
     with torch.no_grad():
         test_score = eval_gen_net(net, val_loader, device, dir_out)
     print(f"Test Score: {test_score}")
