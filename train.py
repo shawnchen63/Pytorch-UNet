@@ -161,7 +161,7 @@ def get_args():
                         help='Checkpoints directory')
     parser.add_argument('-g', '--dir_log', dest='dir_log', type=str, default='runs/',
                         help='Log directory for tensorboard')
-    parser.add_argument('-a'. '--use_augment', action='store_true', help='use augmented data')
+    parser.add_argument('-a', '--use_augment', action='store_true', help='use augmented data')
 
     return parser.parse_args()
 
