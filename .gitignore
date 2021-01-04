@@ -4,3 +4,7 @@ __pycache__/
 *.jpg
 SUBMISSION*
 venv/
+data/
+runs/
+checkpoints/
+results/
