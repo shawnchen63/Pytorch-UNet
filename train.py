@@ -32,9 +32,10 @@ def train_net(net,
               lr=0.001,
               val_percent=0.1,
               save_cp=True,
-              img_scale=1.0):
+              img_scale=1.0,
+              augmented=True):
 
-    dataset = BasicDataset(dir_img, dir_target, img_scale)
+    dataset = BasicDataset(dir_img, dir_target, img_scale, augmented)
     n_val = int(len(dataset) * val_percent)
     n_train = len(dataset) - n_val
 
@@ -206,7 +207,8 @@ if __name__ == '__main__':
                   lr=args.lr,
                   device=device,
                   img_scale=args.scale,
-                  val_percent=args.val / 100)
+                  val_percent=args.val / 100,
+                  augmented=args.use_augment)
     except KeyboardInterrupt:
         torch.save(net.state_dict(), 'INTERRUPTED.pth')
         logging.info('Saved interrupt')
