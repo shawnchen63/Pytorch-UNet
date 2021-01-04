@@ -11,7 +11,7 @@ from utils.image_folder import make_dataset
 
 
 class BasicDataset(Dataset):
-    def __init__(self, imgs_dir, targets_dir, scale=1, target_suffix='Target'):
+    def __init__(self, imgs_dir, targets_dir, scale=1, target_suffix='Target', augmented=True):
         self.imgs_dir = imgs_dir
         self.targets_dir = targets_dir
         self.scale = scale
@@ -21,7 +21,7 @@ class BasicDataset(Dataset):
         #self.ids = [splitext(file)[0] for file in listdir(imgs_dir)
         #            if not file.startswith('.')]
 
-        self.imgs_paths = make_dataset(self.imgs_dir)
+        self.imgs_paths = make_dataset(self.imgs_dir, augmented)
         #self.target_paths = sorted(make_dataset(self.targets_dir))
         logging.info(f'Creating dataset with {len(self.imgs_paths)} input images')
 

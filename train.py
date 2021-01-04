@@ -40,7 +40,7 @@ def train_net(net,
 
     indices = list(range(len(dataset)))
 
-    train_idx, valid_idx = indices[:n_train], indices[n_train:]
+    train_idx, valid_idx = indices[n_val:], indices[:n_val]
     train_sampler = SubsetRandomSampler(train_idx)
     valid_sampler = SubsetRandomSampler(valid_idx)
 
@@ -154,11 +154,11 @@ def get_args():
     parser.add_argument('-v', '--validation', dest='val', type=float, default=10.0,
                         help='Percent of the data that is used as validation (0-100)')
     parser.add_argument('-i', '--dir_img', dest='dir_img', type=str, default='data/imgs/',
-                        help='Load model from a .pth file')
+                        help='Input directory')
     parser.add_argument('-t', '--dir_target', dest='dir_target', type=str, default='data/targets/',
-                        help='Load model from a .pth file')
+                        help='Target directory')
     parser.add_argument('-c', '--dir_checkpoint', dest='dir_checkpoint', type=str, default='checkpoints/',
-                        help='Load model from a .pth file')
+                        help='Checkpoints directory')
     parser.add_argument('-g', '--dir_log', dest='dir_log', type=str, default='runs/',
                         help='Log directory for tensorboard')
     return parser.parse_args()
