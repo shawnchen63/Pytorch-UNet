@@ -35,7 +35,7 @@ def train_net(net,
               img_scale=1.0,
               augmented=True):
 
-    dataset = BasicDataset(dir_img, dir_target, img_scale, augmented)
+    dataset = BasicDataset(dir_img, dir_target, img_scale, augmented=augmented)
     n_val = int(len(dataset) * val_percent)
     n_train = len(dataset) - n_val
 
