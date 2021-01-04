@@ -12,7 +12,6 @@ from torchvision import transforms
 from eval import eval_gen_net
 from predict import predict_img
 from unet import UNet
-from utils.data_vis import plot_img_and_target
 from utils.dataset import BasicDataset
 
 def test_net(net,
