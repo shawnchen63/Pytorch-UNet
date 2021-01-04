@@ -103,7 +103,7 @@ if __name__ == "__main__":
     net.to(device=device)
     net.load_state_dict(torch.load(args.model, map_location=device))
 
-    logging.info("Model loaded !")test_score
+    logging.info("Model loaded !")
 
     for i, fn in enumerate(in_files):
         logging.info("\nGenerating image {} ...".format(fn))
