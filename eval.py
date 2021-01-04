@@ -60,7 +60,7 @@ def eval_gen_net(net, loader, device, out_dir):
 
             for index, single_target_pred in enumerate(target_pred):
                 image = target_to_image(single_target_pred.squeeze().cpu().numpy())
-                image.save(Path(out_dir,indices[index]+"generated.png"))
+                image.save(Path(out_dir,indices[index]+"_generated.png"))
             """
             if net.n_classes > 1:
                 tot += nn.cross_entropy(target_pred, true_targets).item()
