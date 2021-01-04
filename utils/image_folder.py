@@ -24,7 +24,7 @@ def is_image_file(filename):
 def make_dataset(dir, augmented=True):
     images = []
     assert os.path.isdir(dir), '%s is not a valid directory' % dir
-    if train:
+    if augmented:
         accepted = ["Input", "02", "04", "06", "08", "10"]
     else:
         accepted = ["Input"]
