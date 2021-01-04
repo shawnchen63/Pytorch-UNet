@@ -21,7 +21,7 @@ def test_net(net,
             dir_target,
             dir_out,
             img_scale = 1.0,
-            val_percent = 0.1,
+            val_percent = 0.2,
             batch_size = 16):
     
     dataset = BasicDataset(dir_img, dir_target, img_scale, augmented=False)
@@ -48,7 +48,7 @@ def get_args():
                         help='Load model from a .pth file')
     parser.add_argument('-s', '--scale', dest='scale', type=float, default=1.0,
                         help='Downscaling factor of the images')
-    parser.add_argument('-v', '--validation', dest='val', type=float, default=10.0,
+    parser.add_argument('-v', '--validation', dest='val', type=float, default=20.0,
                         help='Percent of the data that is used as validation (0-100)')
     parser.add_argument('-i', '--dir_img', dest='dir_img', type=str, default='data/imgs/',
                         help='Input directory')

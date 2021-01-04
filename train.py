@@ -30,7 +30,7 @@ def train_net(net,
               epochs=5,
               batch_size=1,
               lr=0.001,
-              val_percent=0.1,
+              val_percent=0.2,
               save_cp=True,
               img_scale=1.0,
               augmented=True):
@@ -152,7 +152,7 @@ def get_args():
                         help='Load model from a .pth file')
     parser.add_argument('-s', '--scale', dest='scale', type=float, default=1.0,
                         help='Downscaling factor of the images')
-    parser.add_argument('-v', '--validation', dest='val', type=float, default=10.0,
+    parser.add_argument('-v', '--validation', dest='val', type=float, default=20.0,
                         help='Percent of the data that is used as validation (0-100)')
     parser.add_argument('-i', '--dir_img', dest='dir_img', type=str, default='data/imgs/',
                         help='Input directory')
