@@ -25,7 +25,7 @@ def make_dataset(dir, augmented=True):
     images = []
     assert os.path.isdir(dir), '%s is not a valid directory' % dir
     if augmented:
-        accepted = ["Input", "02", "04", "06", "08", "10"]
+        accepted = ["Input", "02", "06", "10"]
     else:
         accepted = ["Input"]
     for root, _, fnames in os.walk(dir):
