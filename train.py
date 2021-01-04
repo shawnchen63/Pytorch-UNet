@@ -148,7 +148,7 @@ def get_args():
                         help='Batch size', dest='batchsize')
     parser.add_argument('-l', '--learning-rate', metavar='LR', type=float, nargs='?', default=0.0001,
                         help='Learning rate', dest='lr')
-    parser.add_argument('-f', '--load', dest='load', type=str, default='False',
+    parser.add_argument('-f', '--load', dest='load', type=str, default=False,
                         help='Load model from a .pth file')
     parser.add_argument('-s', '--scale', dest='scale', type=float, default=1.0,
                         help='Downscaling factor of the images')
