@@ -111,11 +111,11 @@ def train_net(net,
                         tag = tag.replace('.', '/')
                         writer.add_histogram('weights/' + tag, value.data.cpu().numpy(), global_step)
                         writer.add_histogram('grads/' + tag, value.grad.data.cpu().numpy(), global_step)
-                    val_score = eval_net(net, val_loader, device)
-                    scheduler.step(val_score)
+                    val_scores = eval_net(net, val_loader, device)
+                    scheduler.step(val_scores[0])
                     writer.add_scalar('learning_rate', optimizer.param_groups[0]['lr'], global_step)
 
-                    logging.info('Validation L1: {}'.format(val_score))
+                    logging.info(f'Validation MSE:{val_scores[0]:.4f} SSIM:{val_scores[1]:.4f} PSNR:{val_scores[2]:.4f}')
                     """
                     if net.n_classes > 1:
                         logging.info('Validation cross entropy: {}'.format(val_score))
@@ -183,7 +183,7 @@ if __name__ == '__main__':
     #   - For 1 class and background, use n_classes=1
     #   - For 2 classes, use n_classes=1
     #   - For N > 2 classes, use n_classes=N
-    net = UNet(n_channels=3, n_classes=3, bilinear=False)
+    net = UNet(n_channels=3, n_classes=3, bilinear=True)
     logging.info(f'Network:\n'
                  f'\t{net.n_channels} input channels\n'
                  f'\t{net.n_classes} output channels\n'
