@@ -15,6 +15,7 @@ from torch import optim
 from tqdm import tqdm
 
 from eval import eval_net
+from losses import PerceptualLoss
 from unet import UNet
 
 from torch.utils.tensorboard import SummaryWriter
@@ -71,6 +72,8 @@ def train_net(net,
         criterion = nn.BCEWithLogitsLoss()
     """
     criterion = torch.nn.MSELoss()
+    content_loss = PerceptualLoss()
+    content_loss.initialize(nn.MSELoss())
 
     for epoch in range(epochs):
         net.train()
@@ -90,7 +93,7 @@ def train_net(net,
                 true_targets = true_targets.to(device=device, dtype=target_type)
 
                 targets_pred = net(imgs)
-                loss = criterion(targets_pred, true_targets)
+                loss = criterion(targets_pred, true_targets) + 0.2*content_loss.get_loss(targets_pred, true_targets)
                 epoch_loss += loss.item()
                 writer.add_scalar('Loss/train', loss.item(), global_step)
 
@@ -180,7 +183,7 @@ if __name__ == '__main__':
     #   - For 1 class and background, use n_classes=1
     #   - For 2 classes, use n_classes=1
     #   - For N > 2 classes, use n_classes=N
-    net = UNet(n_channels=3, n_classes=3, bilinear=True)
+    net = UNet(n_channels=3, n_classes=3, bilinear=False)
     logging.info(f'Network:\n'
                  f'\t{net.n_channels} input channels\n'
                  f'\t{net.n_classes} output channels\n'

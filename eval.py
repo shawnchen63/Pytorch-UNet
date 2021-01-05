@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
 
-from dice_loss import dice_coeff
+from lossses import dice_coeff
 from predict import target_to_image
 
 def eval_net(net, loader, device):
