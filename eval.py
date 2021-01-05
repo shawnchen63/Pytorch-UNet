@@ -1,8 +1,12 @@
 from pathlib import Path
+from math import exp
+import math
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.autograd import Variable
 from tqdm import tqdm
 
 from losses import dice_coeff
@@ -70,7 +74,7 @@ def SSIM(img1, img2, window_size=11, window=None, size_average=True, full=False,
     return ret
 
 def PSNR(img1, img2):
-    mse = np.mean( (img1. - img2) ** 2 )
+    mse = np.mean( (img1 - img2) ** 2 )
     if mse == 0:
         return 100
     PIXEL_MAX = 1
@@ -87,17 +91,17 @@ def eval_net(net, loader, device):
 
     with tqdm(total=n_val, desc='Validation round', unit='batch', position=0, leave=True) as pbar:
         for batch in loader:
-            imgs, true_targets = batch['image'], batch['target']
+            imgs, true_targets, grays = batch['image'], batch['target'], batch['gray']
             imgs = imgs.to(device=device, dtype=torch.float32)
             true_targets = true_targets.to(device=device, dtype=target_type)
 
             with torch.no_grad():
-                target_pred = net(imgs)
+                target_pred = net(imgs, grays)
 
             loss = nn.MSELoss()
             tot_MSE += loss(target_pred, true_targets).item()
             tot_SSIM += SSIM(target_pred, true_targets).item()
-            tot_PSNR += PSNR(target_pred, true_targets).item()
+            tot_PSNR += PSNR(target_pred, true_targets)
             """
             if net.n_classes > 1:
                 tot += nn.cross_entropy(target_pred, true_targets).item()
@@ -122,17 +126,17 @@ def eval_gen_net(net, loader, device, out_dir):
 
     with tqdm(total=n_val, desc='Validation round', unit='batch', position=0, leave=True) as pbar:
         for batch in loader:
-            imgs, true_targets, indices = batch['image'], batch['target'], batch['idx']
+            imgs, true_targets, grays, indices = batch['image'], batch['target'], batch['gray'], batch['idx']
             imgs = imgs.to(device=device, dtype=torch.float32)
             true_targets = true_targets.to(device=device, dtype=target_type)
 
             with torch.no_grad():
-                target_pred = net(imgs)
+                target_pred = net(imgs, grays)
 
             loss = nn.MSELoss()
             tot_MSE += loss(target_pred, true_targets).item()
             tot_SSIM += SSIM(target_pred, true_targets).item()
-            tot_PSNR += PSNR(target_pred, true_targets).item()
+            tot_PSNR += PSNR(target_pred, true_targets)
 
             for index, single_target_pred in enumerate(target_pred):
                 image = target_to_image(single_target_pred.squeeze().cpu().numpy())

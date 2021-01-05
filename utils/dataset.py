@@ -63,9 +63,14 @@ class BasicDataset(Dataset):
         img = self.preprocess(img, self.scale)
         target = self.preprocess(target, self.scale)
 
+        r,g,b = img[0]+1, img[1]+1, img[2]+1
+        gray = 1. - (0.299*r+0.587*g+0.114*b)/2.
+        gray = torch.unsqueeze(gray, 0)
+
         return {
             'image': torch.from_numpy(img).type(torch.FloatTensor),
             'target': torch.from_numpy(target).type(torch.FloatTensor),
+            'gray' : torch.from_numpy(gray).type(torch.FloatTensor),
             'idx': idx.split("_")[0]
         }
 

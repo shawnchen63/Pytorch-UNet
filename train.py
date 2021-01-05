@@ -83,6 +83,7 @@ def train_net(net,
             for batch in train_loader:
                 imgs = batch['image']
                 true_targets = batch['target']
+                grays = batch['gray']
                 assert imgs.shape[1] == net.n_channels, \
                     f'Network has been defined with {net.n_channels} input channels, ' \
                     f'but loaded images have {imgs.shape[1]} channels. Please check that ' \
@@ -92,7 +93,7 @@ def train_net(net,
                 target_type = torch.float32
                 true_targets = true_targets.to(device=device, dtype=target_type)
 
-                targets_pred = net(imgs)
+                targets_pred = net(imgs,grays)
                 loss = criterion(targets_pred, true_targets) + 0.2*content_loss.get_loss(targets_pred, true_targets)
                 epoch_loss += loss.item()
                 writer.add_scalar('Loss/train', loss.item(), global_step)
