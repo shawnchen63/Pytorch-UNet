@@ -90,11 +90,12 @@ def train_net(net,
                     'the images are loaded correctly.'
 
                 imgs = imgs.to(device=device, dtype=torch.float32)
+                grays = grays.to(device=device, dtype=torch.float32)
                 target_type = torch.float32
                 true_targets = true_targets.to(device=device, dtype=target_type)
 
                 targets_pred = net(imgs,grays)
-                loss = criterion(targets_pred, true_targets) + 0.2*content_loss.get_loss(targets_pred, true_targets)
+                loss = criterion(targets_pred, true_targets) + 0.1*content_loss.get_loss(targets_pred, true_targets)
                 epoch_loss += loss.item()
                 writer.add_scalar('Loss/train', loss.item(), global_step)
 
@@ -184,11 +185,12 @@ if __name__ == '__main__':
     #   - For 1 class and background, use n_classes=1
     #   - For 2 classes, use n_classes=1
     #   - For N > 2 classes, use n_classes=N
-    net = UNet(n_channels=3, n_classes=3, bilinear=True)
+    net = UNet(n_channels=3, n_classes=3, bilinear=True, self_attention=True)
     logging.info(f'Network:\n'
                  f'\t{net.n_channels} input channels\n'
                  f'\t{net.n_classes} output channels\n'
-                 f'\t{"Bilinear" if net.bilinear else "Transposed conv"} upscaling')
+                 f'\t{"Bilinear" if net.bilinear else "Transposed conv"} upscaling\n'
+                 f'\t{"Using attention" if net.self_attention else "Not using attention"}')
 
     if args.load:
         net.load_state_dict(

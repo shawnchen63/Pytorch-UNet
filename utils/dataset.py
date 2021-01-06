@@ -32,6 +32,7 @@ class BasicDataset(Dataset):
     def preprocess(cls, pil_img, scale):
         w, h = pil_img.size
         newW, newH = int(scale * w), int(scale * h)
+        #newW, newH = int(scale * 1024), int(scale * 1024)
         assert newW > 0 and newH > 0, 'Scale is too small'
         pil_img = pil_img.resize((newW, newH))
 
@@ -65,12 +66,13 @@ class BasicDataset(Dataset):
 
         r,g,b = img[0]+1, img[1]+1, img[2]+1
         gray = 1. - (0.299*r+0.587*g+0.114*b)/2.
+        gray = torch.from_numpy(gray).type(torch.FloatTensor)
         gray = torch.unsqueeze(gray, 0)
 
         return {
             'image': torch.from_numpy(img).type(torch.FloatTensor),
             'target': torch.from_numpy(target).type(torch.FloatTensor),
-            'gray' : torch.from_numpy(gray).type(torch.FloatTensor),
+            'gray' : gray,
             'idx': idx.split("_")[0]
         }
 

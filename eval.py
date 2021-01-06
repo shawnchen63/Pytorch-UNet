@@ -74,7 +74,7 @@ def SSIM(img1, img2, window_size=11, window=None, size_average=True, full=False,
     return ret
 
 def PSNR(img1, img2):
-    mse = np.mean( (img1 - img2) ** 2 )
+    mse = torch.mean( (img1 - img2) ** 2 )
     if mse == 0:
         return 100
     PIXEL_MAX = 1
@@ -93,6 +93,7 @@ def eval_net(net, loader, device):
         for batch in loader:
             imgs, true_targets, grays = batch['image'], batch['target'], batch['gray']
             imgs = imgs.to(device=device, dtype=torch.float32)
+            grays = grays.to(device=device, dtype=torch.float32)
             true_targets = true_targets.to(device=device, dtype=target_type)
 
             with torch.no_grad():
@@ -128,6 +129,7 @@ def eval_gen_net(net, loader, device, out_dir):
         for batch in loader:
             imgs, true_targets, grays, indices = batch['image'], batch['target'], batch['gray'], batch['idx']
             imgs = imgs.to(device=device, dtype=torch.float32)
+            grays = grays.to(device=device, dtype=torch.float32)
             true_targets = true_targets.to(device=device, dtype=target_type)
 
             with torch.no_grad():

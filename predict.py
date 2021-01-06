@@ -20,13 +20,22 @@ def predict_img(net,
                 scale_factor=1,
                 out_threshold=0.5):
     net.eval()
-
-    img = torch.from_numpy(BasicDataset.preprocess(full_img, scale_factor))
-
+    img = BasicDataset.preprocess(full_img, scale_factor)
+    
+    r,g,b = img[0]+1, img[1]+1, img[2]+1
+    gray = 1. - (0.299*r+0.587*g+0.114*b)/2.
+    
+    img = torch.from_numpy(img)
     img = img.unsqueeze(0)
     img = img.to(device=device, dtype=torch.float32)
+    
+    gray = torch.from_numpy(gray).type(torch.FloatTensor)
+    gray = torch.unsqueeze(gray, 0)
+    gray = torch.unsqueeze(gray, 0)
+    gray = gray.to(device=device, dtype=torch.float32)
+    
     with torch.no_grad():
-        output = net(img)
+        output = net(img, gray)
         output = output.squeeze()
         """
         tf = transforms.Compose(
@@ -94,7 +103,7 @@ if __name__ == "__main__":
     in_files = args.input
     out_files = get_output_filenames(args)
 
-    net = UNet(n_channels=3, n_classes=3)
+    net = UNet(n_channels=3, n_classes=3, bilinear=True, self_attention=True)
     logging.basicConfig(level = logging.INFO)
     logging.info("Loading model {}".format(args.model))
 
@@ -108,8 +117,7 @@ if __name__ == "__main__":
     for i, fn in enumerate(in_files):
         logging.info("\nGenerating image {} ...".format(fn))
 
-        img = Image.open(fn)
-
+        img = Image.open(fn).convert('RGB')
         target = predict_img(net=net,
                            full_img=img,
                            scale_factor=args.scale,

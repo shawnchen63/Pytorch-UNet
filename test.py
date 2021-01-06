@@ -63,7 +63,7 @@ def get_args():
 if __name__ == "__main__":
     args = get_args()
 
-    net = UNet(n_channels=3, n_classes=3, bilinear=True)
+    net = UNet(n_channels=3, n_classes=3, bilinear=True, self_attention=True)
     logging.basicConfig(level = logging.INFO)
     logging.info("Loading model {}".format(args.load))
 
