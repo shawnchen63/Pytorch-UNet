@@ -32,7 +32,7 @@ class BasicDataset(Dataset):
     def preprocess(cls, pil_img, scale):
         w, h = pil_img.size
         newW, newH = int(scale * w), int(scale * h)
-        #newW, newH = int(scale * 1024), int(scale * 1024)
+        #newW, newH = int(scale * 512), int(scale * 512)
         assert newW > 0 and newH > 0, 'Scale is too small'
         pil_img = pil_img.resize((newW, newH))
 

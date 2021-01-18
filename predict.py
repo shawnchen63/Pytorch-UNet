@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -126,6 +127,10 @@ if __name__ == "__main__":
         if not args.no_save:
             out_fn = out_files[i]
             result = target_to_image(target)
+            try:
+                Path(out_fn).parents[0].mkdir(parents=True, exist_ok=True)
+            except:
+                print("directory exists")
             result.save(out_files[i])
 
             logging.info("target saved to {}".format(out_files[i]))
