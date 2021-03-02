@@ -30,6 +30,36 @@ class DoubleConv(nn.Module):
         x2 = self.second_conv(x1)
         return x2
 
+class TripleResidual(nn.Module):
+    def __init__(self, in_channels, out_channels, mid_channels=None):
+        super().__init__()
+        if not mid_channels:
+            mid_channels = out_channels
+
+        self.first_conv_1 = nn.Sequential(
+            nn.Conv2d(in_channels, mid_channels, kernel_size=1, padding=0),
+            nn.ReLU(inplace=True)
+        )
+        self.first_conv_3 = nn.Sequential(
+            nn.Conv2d(in_channels, mid_channels, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True)
+        )
+        self.first_conv_5 = nn.Sequential(
+            nn.Conv2d(in_channels, mid_channels, kernel_size=5, padding=2),
+            nn.ReLU(inplace=True)
+        )
+        self.second_conv = nn.Sequential(
+            nn.Conv2d(mid_channels*3, out_channels, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True)
+        )
+  
+    def forward(self, x, res_1):
+        x1= self.first_conv_1(x)
+        x3= self.first_conv_3(x)
+        x5= self.first_conv_5(x)
+        y = torch.cat([x1,x3,x5], dim=1)
+        y = self.second_conv(y)
+        return y+res_1
 
 class Down(nn.Module):
     """Downscaling with maxpool then double conv"""
@@ -53,8 +83,8 @@ class Up(nn.Module):
         # if bilinear, use the normal convolutions to reduce the number of channels
         if bilinear:
             self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
-            self.deconv = DoubleConv(in_channels, out_channels)
-            self.conv = DoubleConv(in_channels, out_channels)
+            self.deconv = TripleResidual(in_channels, out_channels)
+            self.conv = TripleResidual(in_channels, out_channels)
         else:
             self.up = nn.ConvTranspose2d(in_channels , in_channels, kernel_size=2, stride=2)
             self.deconv = DoubleConv(in_channels, out_channels, in_channels)
@@ -75,9 +105,9 @@ class Up(nn.Module):
         # https://github.com/xiaopeng-liao/Pytorch-UNet/commit/8ebac70e633bac59fc22bb5195e513d5832fb3bd
         """
         x2 = x2*grey if self.self_attention else x2
-        x1 = self.deconv(x1)
+        x1 = self.deconv(x1,x2)
         x = torch.cat([x2, x1], dim=1)
-        return self.conv(x)
+        return self.conv(x,x2)
 
 
 class OutConv(nn.Module):
