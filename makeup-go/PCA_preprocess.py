@@ -1,4 +1,3 @@
-
 import argparse
 import os
 import cv2
@@ -20,14 +19,18 @@ def main(args):
     e = mean - e
     cov = e.T @ e
     Q, R = simultaneous_power_iteration(cov)
+    r = R.diagonal()
+    r = np.sqrt(r)/np.sum(np.sqrt(r))
     np.save("Q", Q)
-    np.save("R", R)
+    np.save("R", r)
 
 
 
 
 def one_img(filename):
     im = cv2.imread(filename, 1)
+    if im.max() > 1:
+        im = im / 255.
     return im
 
 
@@ -58,7 +61,7 @@ def simultaneous_power_iteration(X, r=8):
         e = e - Q
         e = e*e
         e = np.sum(e)
-        print(e)
+        #print(e)
     return Q, R
 
 
@@ -68,7 +71,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--original_path', '-o', help='directory to original images')
     parser.add_argument('--beautify_path', '-b', help='directory to beautify images')
-    parser.add_argument('--len', '-l', default=10, type=int, help='data size')
+    parser.add_argument('--len', '-l', default=1000, type=int, help='data size')
 
     args = parser.parse_args()
     main(args)

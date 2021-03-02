@@ -127,6 +127,7 @@ if __name__ == "__main__":
         if not args.no_save:
             out_fn = out_files[i]
             result = target_to_image(target)
+            #result = result.resize((img.size[0],img.size[1]))
             try:
                 Path(out_fn).parents[0].mkdir(parents=True, exist_ok=True)
             except:

@@ -24,6 +24,7 @@ def create_window(window_size, channel):
 
 def SSIM(img1, img2, window_size=11, window=None, size_average=True, full=False, val_range=None):
     # Value range can be different from 255. Other common ranges are 1 (sigmoid) and 2 (tanh).
+    print(img1.shape)
     if val_range is None:
         if torch.max(img1) > 128:
             max_val = 255

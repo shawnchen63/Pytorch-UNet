@@ -49,7 +49,8 @@ def train(param):
     model = CRN.CRN(**param["network"]["kwargs"])
 
 
-    criterion = registry.create('Loss', param["loss"]["name"])(**param["loss"]["kwargs"])
+    #criterion = registry.create('Loss', param["loss"]["name"])(**param["loss"]["kwargs"])
+    criterion = torch.nn.L1Loss()
     optimizer = registry.create('Optimizer', param["optimizer"]["name"])(model.parameters(), **param["optimizer"]["kwargs"])
     lr_scheduler = registry.create('LRScheduler', param["lr_scheduler"]["name"])(optimizer, **param["lr_scheduler"]["kwargs"])
 
@@ -86,10 +87,10 @@ def train(param):
             print("epoch:", epoch)
             counter = 0
             for inputs, targets in train_data_loader:
-                lr_scheduler.step()
                 optimizer.zero_grad()
 
                 ground_truth = pca.get_components(inputs, targets, True)
+                #print(ground_truth)
                 # print('########')
                 # print(ground_truth.shape)
                 # for current_data in ground_truth:
@@ -109,7 +110,6 @@ def train(param):
                 # with torch.no_grad():
                 #     img = pca.generate_img(output[0], inputs[0])
                 #     save_image(img, "output_PCA_modified/train/result_{}_{}_before.jpg".format(epoch, counter))
-
                 loss = criterion(output, ground_truth)
 
                 if counter % 10 == 0:
@@ -134,24 +134,31 @@ def train(param):
                             output = torch.squeeze(model(x), 0)
                             print("generating one image...")
                             img = pca.generate_img(output, x)
+                            img = img.cpu()
                             np_img = np.array(img[0])
+                            np_img *= 255
+                            #print(np_img)
                             # print('before conversion')
                             # print('@@@@@@@@')
-                            # print(np_img)
                             np_img[np_img>255] = 255
                             np_img[np_img<0] = 0
                             np_img = np_img.transpose((1, 2, 0)).astype(np.uint8)
-                            plt.close()
-                            plt.imshow(np_img)
-                            plt.savefig("output_PCA_modified/result_{}_{}.jpg".format(epoch, counter))
+                            Image.fromarray(np_img).save("output_PCA_modified/result_{}_{}.jpg".format(epoch, counter))
+                            #plt.close()
+                            #plt.imshow(np_img)
+                            #plt.savefig("output_PCA_modified/result_{}_{}.jpg".format(epoch, counter))
                             # save_image(img, "output_PCA_modified/result_{}_{}.jpg".format(epoch, counter))
-
+                
+                a = list(model.parameters())[0].clone()
                 loss.backward()
 
                 # perform gradient clipping
                 clip_grad_norm_(model.parameters(), 2)
 
                 optimizer.step()
+                lr_scheduler.step()
+                b = list(model.parameters())[0].clone()
+                print(torch.equal(a.data, b.data))
                 # with torch.no_grad():
                 #     output = torch.squeeze(model(inputs[0].unsqueeze_(0)), 0)
                 #     img = pca.generate_img(output, inputs[0]).view(sz)
@@ -204,24 +211,22 @@ def train(param):
                 sz = x.shape
                 x.unsqueeze_(0)
                 output = model(x)
-                print(output.shape)
                 output = torch.squeeze(output,0)
-                print(output.shape)
                 print("generating one image...")
                 img = pca.generate_img(output, x).view(sz)
-                print(img)
-                save_image(img, "output/{}_result.jpg".format(name))
+                save_image(img, "output_PCA_modified/{}_result.jpg".format(name))
 
 
 def img_to_tensor(path):
     image = imread(path)
-    image = image[:46 * 11, :46 * 11, :]
+    image = image[:23 * 11, :23 * 11, :]
     image = np.transpose(image, (2,0,1))
+    image = image.astype(float)
+    if image.max() > 1:
+        image = image / 255.
     x = torch.tensor(image).cuda()
     # x = TF.to_tensor(image).cuda()
     return x.float()
-
-
 if __name__ == '__main__':
 
     

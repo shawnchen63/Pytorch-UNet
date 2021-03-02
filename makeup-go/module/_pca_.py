@@ -1,6 +1,6 @@
 import torch
 
-
+import numpy as np
 patch_m = 11
 
 
@@ -11,13 +11,14 @@ class PCA():
             # dim = kernel*kernel*3
             # self.kernel = kernel
             # self.n_top = n_top
-            # self.mean = torch.zeros(1, dim)
-            # self.proj = torch.eye(dim)
-            self.eigenvalues = (torch.load("R.t")).float().cuda()
-            self.eigenvectors = torch.load("Q.t")[:, :7].float().cuda()
+            # self.eigenvalues = torch.zeros(1, dim)
+            # self.proj = torch.eye(dim) 
+            self.eigenvalues =  torch.from_numpy(np.load("R.npy")).float().cuda()           
+            self.eigenvectors =  torch.from_numpy(np.load("Q.npy")[:, :7]).float().cuda()
             # print("eigenvectors ")
-            self.mean = (torch.load("mean.t")).float().cuda()
+            self.mean =  torch.from_numpy(np.load("mean.npy")).float().cuda()
             # .view(3,11,11)
+
             # self.momentum = momentum
 
     # def add_truth(self, X):
@@ -42,8 +43,8 @@ class PCA():
             e = y - x 
             # torch.save(e, "e.t")
             patches, sz = get_patches(e)
-            centered_patches = patches - self.mean
-            
+            centered_patches = (patches - self.mean).cuda()
+
             components = []
             for i in range(7):
                 # print('eigenvectors shape', self.eigenvectors.shape)

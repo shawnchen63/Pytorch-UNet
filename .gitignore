@@ -9,6 +9,7 @@ runs/
 checkpoints/
 results/
 test_results/
+makeup-go/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

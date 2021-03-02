@@ -58,8 +58,8 @@ patch_m = 11
 class TrainDataset(Dataset):
     def __init__(self, path, len):
         # @TODO
-        self.y_path = path + "original/"  # where to load original images
-        self.x_path = path + "beautified/"  # where to load beautified imgs
+        self.y_path = path + "targets/"  # where to load original images
+        self.x_path = path + "generated/"  # where to load beautified imgs
         # self.image_x = load_all_images(beautify_path)  # load beautified images: N x H x W x 3
         # image_y = load_all_images(original_path)      # load ground truth imgs: N x H x W x 3
         # self.image_e = get_patches(image_y - image_x)  # N x (H*W*3), every entry is a vector
@@ -91,9 +91,11 @@ class TrainDataset(Dataset):
 
 def img_to_tensor(path):
     image = imread(path)
-    image = image[:46 * 11, :46 * 11, :]
+    image = image[:23 * 11, :23 * 11, :]
     image = np.transpose(image, (2,0,1))
     image = image.astype(float)
+    if image.max() > 1:
+        image = image / 255.
     x = torch.tensor(image).cuda()
     # x = TF.to_tensor(image).cuda()
     return x.float()
