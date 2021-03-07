@@ -15,7 +15,7 @@ from torch import optim
 from tqdm import tqdm
 
 from eval import eval_net
-from losses import PerceptualLoss
+from losses import PerceptualLoss, SSIMLoss
 from unet import UNet
 
 from torch.utils.tensorboard import SummaryWriter
@@ -75,6 +75,8 @@ def train_net(net,
     content_loss = PerceptualLoss()
     content_loss.initialize(nn.MSELoss())
 
+    ssim_loss = SSIMLoss(window_size = 11)
+
     for epoch in range(epochs):
         net.train()
 
@@ -95,7 +97,7 @@ def train_net(net,
                 true_targets = true_targets.to(device=device, dtype=target_type)
 
                 targets_pred = net(imgs,grays)
-                loss = criterion(targets_pred, true_targets) + 0.1*content_loss.get_loss(targets_pred, true_targets)
+                loss = criterion(targets_pred, true_targets) + 0.2*content_loss.get_loss(targets_pred, true_targets) - 0.2*ssim_loss(targets_pred, true_targets)
                 epoch_loss += loss.item()
                 writer.add_scalar('Loss/train', loss.item(), global_step)
 
