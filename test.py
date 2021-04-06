@@ -8,7 +8,7 @@ import torch.nn.functional as F
 from PIL import Image
 from numpy import moveaxis
 from torchvision import transforms
-from torch.utils.data import DataLoader, random_split, SubsetRandomSampler
+from torch.utils.data import DataLoader, random_split, SequentialSampler
 
 from eval import eval_gen_net
 from predict import predict_img
@@ -23,15 +23,14 @@ def test_net(net,
             img_scale = 1.0,
             val_percent = 0.2,
             batch_size = 16):
-    
     dataset = BasicDataset(dir_img, dir_target, img_scale, augmented=False)
     n_val = int(len(dataset) * val_percent)
     indices = list(range(len(dataset)))
-
+    
     test_idx = indices[:n_val]
-    test_sampler = SubsetRandomSampler(test_idx)
+    test_sampler = SequentialSampler(test_idx)
 
-    test_loader = DataLoader(dataset, batch_size=batch_size, sampler=test_sampler, num_workers=8, pin_memory=True, drop_last=True)
+    test_loader = DataLoader(dataset, batch_size=batch_size, sampler=test_sampler, num_workers=8, pin_memory=True, drop_last=True, shuffle=False)
     with torch.no_grad():
         test_scores = eval_gen_net(net, test_loader, device, dir_out)
     print(f'Validation MSE:{test_scores[0]:.4f} SSIM:{test_scores[1]:.4f} PSNR:{test_scores[2]:.4f}')
@@ -67,7 +66,7 @@ if __name__ == "__main__":
     logging.basicConfig(level = logging.INFO)
     logging.info("Loading model {}".format(args.load))
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
     logging.info(f'Using device {device}')
     net.to(device=device)
     net.load_state_dict(torch.load(args.load, map_location=device))

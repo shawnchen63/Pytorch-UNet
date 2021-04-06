@@ -15,7 +15,7 @@ from torch import optim
 from tqdm import tqdm
 
 from eval import eval_net
-from losses import PerceptualLoss, SSIMLoss
+from losses import PerceptualLoss, SSIM, MS_SSIM
 from unet import UNet
 
 from torch.utils.tensorboard import SummaryWriter
@@ -46,8 +46,8 @@ def train_net(net,
     train_sampler = SubsetRandomSampler(train_idx)
     valid_sampler = SubsetRandomSampler(valid_idx)
 
-    train_loader = DataLoader(dataset, batch_size=batch_size, sampler=train_sampler, num_workers=8, pin_memory=True)
-    val_loader = DataLoader(dataset, batch_size=batch_size, sampler=valid_sampler, num_workers=8, pin_memory=True, drop_last=True)
+    train_loader = DataLoader(dataset, batch_size=batch_size, sampler=train_sampler, num_workers=8, pin_memory=False)
+    val_loader = DataLoader(dataset, batch_size=batch_size, sampler=valid_sampler, num_workers=8, pin_memory=False, drop_last=True)
 
     writer = SummaryWriter(dir_log, comment=f'LR_{lr}_BS_{batch_size}_SCALE_{img_scale}')
     global_step = 0
@@ -73,9 +73,10 @@ def train_net(net,
     """
     criterion = torch.nn.MSELoss()
     content_loss = PerceptualLoss()
-    content_loss.initialize(nn.MSELoss())
+    content_loss.initialize(nn.MSELoss(), device)
 
-    ssim_loss = SSIMLoss(window_size = 11)
+    #ssim_module = SSIM(data_range=1, size_average=True, channel=3)
+    #ms_ssim_module = MS_SSIM(data_range=1, size_average=True, channel=3)
 
     for epoch in range(epochs):
         net.train()
@@ -97,7 +98,8 @@ def train_net(net,
                 true_targets = true_targets.to(device=device, dtype=target_type)
 
                 targets_pred = net(imgs,grays)
-                loss = criterion(targets_pred, true_targets) + 0.2*content_loss.get_loss(targets_pred, true_targets) - 0.2*ssim_loss(targets_pred, true_targets)
+                loss = criterion(targets_pred, true_targets) + 0.2*content_loss.get_loss(targets_pred, true_targets)
+                #+ 0.2*(1 - ssim_module(targets_pred, true_targets)+ 1 - ms_ssim_module(targets_pred, true_targets))
                 epoch_loss += loss.item()
                 writer.add_scalar('Loss/train', loss.item(), global_step)
 
@@ -178,7 +180,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
     args = get_args()
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
     logging.info(f'Using device {device}')
 
     # Change here to adapt to your data

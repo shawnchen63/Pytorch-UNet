@@ -53,13 +53,13 @@ class TripleResidual(nn.Module):
             nn.ReLU(inplace=True)
         )
   
-    def forward(self, x, res_1):
+    def forward(self, x, res_1=None):
         x1= self.first_conv_1(x)
         x3= self.first_conv_3(x)
         x5= self.first_conv_5(x)
         y = torch.cat([x1,x3,x5], dim=1)
         y = self.second_conv(y)
-        return y+res_1
+        return y+res_1 if torch.is_tensor(res_1) else y
 
 class Down(nn.Module):
     """Downscaling with maxpool then double conv"""
@@ -67,7 +67,7 @@ class Down(nn.Module):
     def __init__(self, in_channels, out_channels, self_attention=False):
         super().__init__()
         self.maxpool= nn.MaxPool2d(2)
-        self.conv = DoubleConv(in_channels, out_channels, self_attention=self_attention)
+        self.conv = DoubleConv(in_channels, out_channels)
         
     def forward(self, x, grey=None):
         x = self.maxpool(x)
@@ -83,8 +83,8 @@ class Up(nn.Module):
         # if bilinear, use the normal convolutions to reduce the number of channels
         if bilinear:
             self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
-            self.deconv = TripleResidual(in_channels, out_channels)
-            self.conv = TripleResidual(in_channels, out_channels)
+            self.deconv = DoubleConv(in_channels, out_channels)
+            self.conv = DoubleConv(in_channels, out_channels)
         else:
             self.up = nn.ConvTranspose2d(in_channels , in_channels, kernel_size=2, stride=2)
             self.deconv = DoubleConv(in_channels, out_channels, in_channels)
@@ -105,9 +105,9 @@ class Up(nn.Module):
         # https://github.com/xiaopeng-liao/Pytorch-UNet/commit/8ebac70e633bac59fc22bb5195e513d5832fb3bd
         """
         x2 = x2*grey if self.self_attention else x2
-        x1 = self.deconv(x1,x2)
+        x1 = self.deconv(x1)
         x = torch.cat([x2, x1], dim=1)
-        return self.conv(x,x2)
+        return self.conv(x)
 
 
 class OutConv(nn.Module):

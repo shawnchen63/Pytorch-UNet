@@ -11,11 +11,12 @@ from utils.image_folder import make_dataset
 
 
 class BasicDataset(Dataset):
-    def __init__(self, imgs_dir, targets_dir, scale=1, target_suffix='Target', augmented=True):
+    def __init__(self, imgs_dir, targets_dir, scale=1, target_suffix='Target', augmented=True, train=True):
         self.imgs_dir = imgs_dir
         self.targets_dir = targets_dir
         self.scale = scale
         self.target_suffix = target_suffix
+        self.train = train
         assert 0 < scale <= 1, 'Scale must be between 0 and 1'
 
         #self.ids = [splitext(file)[0] for file in listdir(imgs_dir)
@@ -29,10 +30,12 @@ class BasicDataset(Dataset):
         return len(self.imgs_paths)
 
     @classmethod
-    def preprocess(cls, pil_img, scale):
+    def preprocess(cls, pil_img, scale, train=True):
         w, h = pil_img.size
-        #newW, newH = int(scale * w), int(scale * h)
-        newW, newH = int(scale * 512), int(scale * 512)
+        if train:
+            newW, newH = int(scale * w), int(scale * h)
+        else:
+            newW, newH = int(scale * 512), int(scale * 512)
         assert newW > 0 and newH > 0, 'Scale is too small'
         pil_img = pil_img.resize((newW, newH))
 
@@ -61,8 +64,8 @@ class BasicDataset(Dataset):
         assert img.size == target.size, \
             f'Image and target {idx} should be the same size, but are {img.size} and {target.size}'
 
-        img = self.preprocess(img, self.scale)
-        target = self.preprocess(target, self.scale)
+        img = self.preprocess(img, self.scale, self.train)
+        target = self.preprocess(target, self.scale, self.train)
 
         r,g,b = img[0]+1, img[1]+1, img[2]+1
         gray = 1. - (0.299*r+0.587*g+0.114*b)/2.

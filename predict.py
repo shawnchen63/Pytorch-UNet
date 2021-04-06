@@ -21,7 +21,7 @@ def predict_img(net,
                 scale_factor=1,
                 out_threshold=0.5):
     net.eval()
-    img = BasicDataset.preprocess(full_img, scale_factor)
+    img = BasicDataset.preprocess(full_img, scale_factor, train=False)
     
     r,g,b = img[0]+1, img[1]+1, img[2]+1
     gray = 1. - (0.299*r+0.587*g+0.114*b)/2.
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     logging.basicConfig(level = logging.INFO)
     logging.info("Loading model {}".format(args.model))
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
     logging.info(f'Using device {device}')
     net.to(device=device)
     net.load_state_dict(torch.load(args.model, map_location=device))
@@ -127,7 +127,7 @@ if __name__ == "__main__":
         if not args.no_save:
             out_fn = out_files[i]
             result = target_to_image(target)
-            #result = result.resize((img.size[0],img.size[1]))
+            result = result.resize((img.size[0],img.size[1]))
             try:
                 Path(out_fn).parents[0].mkdir(parents=True, exist_ok=True)
             except:
