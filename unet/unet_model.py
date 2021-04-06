@@ -1,8 +1,58 @@
 """ Full assembly of the parts to form the complete network """
 
 import torch.nn.functional as F
+import torch.nn as nn
 
 from .unet_parts import *
+
+
+######################################################################################
+# Padding Tensors
+######################################################################################
+
+def pad_tensor(input):
+    
+    height_org, width_org = input.shape[2], input.shape[3]
+    divide = 16
+
+    if width_org % divide != 0 or height_org % divide != 0:
+
+        width_res = width_org % divide
+        height_res = height_org % divide
+        if width_res != 0:
+            width_div = divide - width_res
+            pad_left = int(width_div / 2)
+            pad_right = int(width_div - pad_left)
+        else:
+            pad_left = 0
+            pad_right = 0
+
+        if height_res != 0:
+            height_div = divide - height_res
+            pad_top = int(height_div  / 2)
+            pad_bottom = int(height_div  - pad_top)
+        else:
+            pad_top = 0
+            pad_bottom = 0
+
+        padding = nn.ReflectionPad2d((pad_left, pad_right, pad_top, pad_bottom))
+        input = padding(input)
+    else:
+        pad_left = 0
+        pad_right = 0
+        pad_top = 0
+        pad_bottom = 0
+
+    height, width = input.data.shape[2], input.data.shape[3]
+    assert width % divide == 0, 'width cant divided by stride'
+    assert height % divide == 0, 'height cant divided by stride'
+
+    return input, pad_left, pad_right, pad_top, pad_bottom
+
+def pad_tensor_back(input, pad_left, pad_right, pad_top, pad_bottom):
+    height, width = input.shape[2], input.shape[3]
+    return input[:,:, pad_top: height - pad_bottom, pad_left: width - pad_right]
+
 
 class UNet(nn.Module):
     def __init__(self, n_channels, n_classes, bilinear=False, self_attention=False):
@@ -34,7 +84,20 @@ class UNet(nn.Module):
         self.downsample_4 = nn.MaxPool2d(2)
 
     def forward(self, x, gray=None):
+
+        flag = 0
+        if x.size()[3] > 2200:
+            avg = nn.AvgPool2d(2)
+            x = avg(x)
+            if self.self_attention:
+                gray = avg(gray)
+            flag = 1
+            # pass
+        x, pad_left, pad_right, pad_top, pad_bottom = pad_tensor(x)
+
         if self.self_attention:
+            gray, pad_left, pad_right, pad_top, pad_bottom = pad_tensor(gray)
+
             x = torch.cat((x, gray), 1)
             gray_2 = self.downsample_1(gray)
             gray_3 = self.downsample_2(gray_2)
@@ -50,5 +113,16 @@ class UNet(nn.Module):
         x = self.up2(x, x3, gray_3) if self.self_attention else self.up2(x, x3)
         x = self.up3(x, x2, gray_2) if self.self_attention else self.up3(x, x2)
         x = self.up4(x, x1, gray) if self.self_attention else self.up4(x, x1)
-        logits = self.outc(x)
-        return logits
+        output = self.outc(x)
+
+        output = pad_tensor_back(output, pad_left, pad_right, pad_top, pad_bottom)
+        
+        if self.self_attention:
+            gray = pad_tensor_back(gray, pad_left, pad_right, pad_top, pad_bottom)
+        
+        if flag == 1:
+            output = F.upsample(output, scale_factor=2, mode='bilinear')
+            if self.self_attention:
+                gray = F.upsample(gray, scale_factor=2, mode='bilinear')
+
+        return output
