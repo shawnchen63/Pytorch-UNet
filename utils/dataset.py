@@ -32,11 +32,12 @@ class BasicDataset(Dataset):
     @classmethod
     def preprocess(cls, pil_img, scale, train=True):
         w, h = pil_img.size
-        if train:
-            newW, newH = int(scale * w), int(scale * h)
+        if w>1500 and h>1500:
+            newW, newH = int(0.4 * w), int(0.4 * h)
         else:
-            newW, newH = int(scale * 512), int(scale * 512)
+            newW, newH = int(scale * w), int(scale * h)
         assert newW > 0 and newH > 0, 'Scale is too small'
+
         pil_img = pil_img.resize((newW, newH))
 
         img_nd = np.array(pil_img)

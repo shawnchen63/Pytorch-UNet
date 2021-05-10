@@ -13,6 +13,7 @@ from torchvision import transforms
 from unet import UNet
 from utils.data_vis import plot_img_and_target
 from utils.dataset import BasicDataset
+from unet.EnlightenGAN_model import Unet_resize_conv
 
 
 def predict_img(net,
@@ -29,7 +30,7 @@ def predict_img(net,
     img = torch.from_numpy(img)
     img = img.unsqueeze(0)
     img = img.to(device=device, dtype=torch.float32)
-    
+        
     gray = torch.from_numpy(gray).type(torch.FloatTensor)
     gray = torch.unsqueeze(gray, 0)
     gray = torch.unsqueeze(gray, 0)
@@ -105,6 +106,7 @@ if __name__ == "__main__":
     out_files = get_output_filenames(args)
 
     net = UNet(n_channels=3, n_classes=3, bilinear=True, self_attention=True)
+    #net = Unet_resize_conv(1,1)
     logging.basicConfig(level = logging.INFO)
     logging.info("Loading model {}".format(args.model))
 

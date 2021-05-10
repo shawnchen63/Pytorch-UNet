@@ -17,6 +17,7 @@ from tqdm import tqdm
 from eval import eval_net
 from losses import PerceptualLoss, SSIM, MS_SSIM
 from unet import UNet
+from unet.EnlightenGAN_model import Unet_resize_conv
 
 from torch.utils.tensorboard import SummaryWriter
 from utils.dataset import BasicDataset
@@ -190,11 +191,13 @@ if __name__ == '__main__':
     #   - For 2 classes, use n_classes=1
     #   - For N > 2 classes, use n_classes=N
     net = UNet(n_channels=3, n_classes=3, bilinear=True, self_attention=True)
+    #net = Unet_resize_conv(1,1)
+    """
     logging.info(f'Network:\n'
                  f'\t{net.n_channels} input channels\n'
                  f'\t{net.n_classes} output channels\n'
                  f'\t{"Bilinear" if net.bilinear else "Transposed conv"} upscaling\n'
-                 f'\t{"Using attention" if net.self_attention else "Not using attention"}')
+                 f'\t{"Using attention" if net.self_attention else "Not using attention"}')"""
 
     if args.load:
         net.load_state_dict(

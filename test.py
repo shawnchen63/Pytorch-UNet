@@ -14,6 +14,7 @@ from eval import eval_gen_net
 from predict import predict_img
 from unet import UNet
 from utils.dataset import BasicDataset
+from unet.EnlightenGAN_model import Unet_resize_conv
 
 def test_net(net,
             device,
@@ -62,7 +63,8 @@ def get_args():
 if __name__ == "__main__":
     args = get_args()
 
-    net = UNet(n_channels=3, n_classes=3, bilinear=True, self_attention=True)
+    #net = UNet(n_channels=3, n_classes=3, bilinear=True, self_attention=True)
+    net = Unet_resize_conv(1,1)
     logging.basicConfig(level = logging.INFO)
     logging.info("Loading model {}".format(args.load))
 
